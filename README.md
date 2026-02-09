@@ -1,1 +1,3 @@
-# pokemon-flutter-app
+# pokemon_app
+
+A new Flutter project.
