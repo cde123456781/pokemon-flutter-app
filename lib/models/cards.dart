@@ -271,4 +271,22 @@ class CardBrief {
   final String localId;
   final String name;
   final String? image;
+
+  static CardBrief fromJson(Map<String, Object?> json) {
+    String? image;
+    if (json.containsKey("image")) {
+      image = json["image"] as String?;
+    }
+
+    
+
+    CardBrief cardBrief = CardBrief(
+      id: json["id"] as String,
+      localId: json["localId"] as String,
+      name: json["name"] as String,
+      image: image
+    );
+    
+    return cardBrief;
+  }
 }
