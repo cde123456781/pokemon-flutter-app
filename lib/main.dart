@@ -28,11 +28,11 @@ class MainApp extends StatelessWidget {
 
 
 class CardBriefService {
-  Future<List<CardBrief>> fetchCards() async {
+  Future<List<CardBrief>> fetchCards(String name) async {
     final uri = Uri.https(
       "api.tcgdex.net",
       "/v2/en/cards",
-      {"name": "pikachu"}
+      {"name": name}
     );
 
 
@@ -63,11 +63,11 @@ class CardBriefViewModel extends ChangeNotifier {
 
   List<CardBrief> get cardBriefs => _cardBriefs;
 
-  Future<void> getCardBriefs() async {
+  Future<void> getCardBriefs(String name) async {
     loading = true;
     notifyListeners();
     try {
-      _cardBriefs = await _service.fetchCards();
+      _cardBriefs = await _service.fetchCards(name);
       errorMessage = null;
 
 
@@ -95,23 +95,30 @@ class CardBriefView extends StatelessWidget {
         title: const Text("Flutter Pokemon"),
         actions: []
       ),
-      body: ListenableBuilder(
-        listenable: viewModel,
-        builder: (context, child) {
-          return switch ((
-            viewModel.loading,
-            viewModel.cardBriefs,
-            viewModel.errorMessage
-          )) {
-            (true, _, _) => Container(alignment: Alignment.center ,child: CircularProgressIndicator()),
-            (false, _, String message) => Center(child: Text(message)),
-            (false, List<CardBrief> cardBriefs, null) => CardBriefPage(
-              cardBriefs: cardBriefs,
-              onPressed: viewModel.getCardBriefs
-            )
-          };
-        }
-          
+      body: Column(
+        children: [
+          Center(
+            child: SearchWidget(onPressed: viewModel.getCardBriefs)
+          ),
+          ListenableBuilder(
+            listenable: viewModel,
+            builder: (context, child) {
+              return switch ((
+                viewModel.loading,
+                viewModel.cardBriefs,
+                viewModel.errorMessage
+              )) {
+                (true, _, _) => Container(alignment: Alignment.center ,child: CircularProgressIndicator()),
+                (false, _, String message) => Center(child: Text(message)),
+                (false, List<CardBrief> cardBriefs, null) => CardBriefPage(
+                  cardBriefs: cardBriefs,
+                  //onPressed: viewModel.getCardBriefs
+                )
+              };
+            }
+              
+          )
+        ]
       )
     );
   }
@@ -121,24 +128,17 @@ class CardBriefPage extends StatelessWidget {
   const CardBriefPage({
     super.key,
     required this.cardBriefs,
-    required this.onPressed
+    //required this.onPressed
   });
 
   final List<CardBrief> cardBriefs;
-  final VoidCallback onPressed;
+  //final Function onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Center(
-          child: ElevatedButton(
-            onPressed: onPressed, 
-            child: Text("Next Random Article")
-          ) 
-        ),
-      
+    return Container(
+
+      child: 
         switch (cardBriefs.isNotEmpty) {
           (true) => Flexible(
           child: Center(
@@ -166,17 +166,65 @@ class CardBriefPage extends StatelessWidget {
         ),
         (false) => Text("No results found")
         }
-        
-         
-        
-
-      ]
+      
     
     );
     
     
   }
 
+}
+
+
+class SearchWidget extends StatefulWidget {
+  const SearchWidget({super.key, required this.onPressed});
+
+  final Function onPressed;
+
+  @override
+  SearchWidgetState createState() {
+    return SearchWidgetState();
+  }
+}
+
+
+
+class SearchWidgetState extends State<SearchWidget> {  
+  TextEditingController controller = TextEditingController();
+
+  @override
+  void dispose() {
+    super.dispose();
+    controller.dispose();
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return FractionallySizedBox(
+      widthFactor: 0.5,
+      child: Row(
+        children: [
+          Expanded(child: TextField(
+              
+              controller: controller,
+              onSubmitted: (value) => widget.onPressed(value),
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                hintText: 'Enter a search term',
+              ),
+            )
+          ),
+          ElevatedButton(
+              onPressed: () => widget.onPressed(controller.text), 
+            child: Text("Search")
+          ),
+
+        ]
+      )
+    );
+
+  }
 }
 
 
