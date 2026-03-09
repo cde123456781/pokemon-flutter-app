@@ -23,6 +23,7 @@ class Sidebar extends StatelessWidget {
                 // Update the state of the app
                 // Then close the drawer
                 Navigator.pop(context);
+                Navigator.pushNamed(context, '/');
               },
             ),
             ListTile(
@@ -31,6 +32,7 @@ class Sidebar extends StatelessWidget {
                 // Update the state of the app
                 // Then close the drawer
                 Navigator.pop(context);
+                Navigator.pushNamed(context, '/sets');
               },
             ),
 

@@ -44,6 +44,34 @@ class SetBrief {
   final String? logo;
   final String? symbol;
   final CardCountBrief cardCount;
+
+
+  static SetBrief fromJson(Map<String, Object?> json) {
+    String? logo;
+    String? symbol;
+    CardCountBrief cardCountBrief;
+    if (json.containsKey("logo")) {
+      logo = json["logo"] as String?;
+    }
+
+    if (json.containsKey("symbol")) {
+      symbol = json["symbol"] as String?;
+    }
+
+    cardCountBrief = CardCountBrief.fromJson(json["cardCount"] as Map<String, Object?>);
+
+    
+
+    SetBrief setBrief = SetBrief(
+      id: json["id"] as String,
+      name: json["name"] as String,
+      logo: logo,
+      symbol: symbol,
+      cardCount: cardCountBrief
+    );
+    
+    return setBrief;
+  }
 }
 
 
@@ -55,6 +83,11 @@ class CardCountBrief {
 
   final num total;
   final num official;
+
+  static CardCountBrief fromJson(Map<String, Object?> json) {
+    return CardCountBrief(total: json["total"] as num, official: json["official"] as num);
+  }
+
 }
 
 

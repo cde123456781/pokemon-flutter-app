@@ -6,6 +6,9 @@ import 'package:http/http.dart';
 import "dart:convert";
 
 import 'package:pokemon_app/models/cards.dart' hide Card;
+import 'package:pokemon_app/widgets/appContainer.dart';
+import 'package:pokemon_app/widgets/loadingIndicator.dart';
+import 'package:pokemon_app/widgets/sidebar.dart';
 
 import 'package:responsive_framework/responsive_framework.dart';
 
@@ -73,13 +76,7 @@ class CardBriefView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Flutter Pokemon"),
-        actions: []
-      ),
-      body: Column(
-        children: [
+    return AppContainer(children: [
           Center(
             child: SearchWidget(onPressed: viewModel.getCardBriefs)
           ),
@@ -91,7 +88,7 @@ class CardBriefView extends StatelessWidget {
                 viewModel.cardBriefs,
                 viewModel.errorMessage
               )) {
-                (true, _, _) => Container(alignment: Alignment.center ,child: CircularProgressIndicator()),
+                (true, _, _) => LoadingIndicator(),
                 (false, _, String message) => Center(child: Text(message)),
                 (false, List<CardBrief> cardBriefs, null) => CardBriefPage(
                   cardBriefs: cardBriefs,
@@ -101,9 +98,7 @@ class CardBriefView extends StatelessWidget {
             }
               
           )
-        ]
-      )
-    );
+        ]);
   }
 }
 
