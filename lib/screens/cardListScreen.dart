@@ -5,16 +5,18 @@ import 'package:http/http.dart';
 
 import "dart:convert";
 
-import 'package:pokemon_app/models/cards.dart' hide Card;
+import 'package:pokemon_app/models/cards.dart' as cards;
+import 'package:pokemon_app/models/sets.dart';
 import 'package:pokemon_app/widgets/appContainer.dart';
 import 'package:pokemon_app/widgets/loadingIndicator.dart';
-import 'package:pokemon_app/widgets/sidebar.dart';
+import 'package:pokemon_app/widgets/searchWidget.dart';
 
 import 'package:responsive_framework/responsive_framework.dart';
 
 
 class CardBriefService {
-  Future<List<CardBrief>> fetchCards(String name) async {
+  Future<List<cards.CardBrief>> fetchCards(String name, String? setId) async {
+
     final uri = Uri.https(
       "api.tcgdex.net",
       "/v2/en/cards",
@@ -22,15 +24,39 @@ class CardBriefService {
     );
 
 
+
     final response = await get(uri);
-    List<CardBrief> cards = [];
+    List<cards.CardBrief> retrievedCards = [];
 
     if (response.statusCode == 200) {
       Iterable list = json.decode(response.body);
       for (final e in list) {
-        cards.add(CardBrief.fromJson(e));
+        retrievedCards.add(cards.CardBrief.fromJson(e));
       }
-      return cards;
+
+      if (setId == null) {
+        return retrievedCards;
+      } else {
+        List<cards.CardBrief> returnCards = [];
+        for (final e in retrievedCards) {
+          var setCheckUri = Uri.https(
+            "api.tcgdex.net",
+            "/v2/en/cards/${e.id}",
+          );
+          var setCheckResponse = await get(setCheckUri);
+          if (setCheckResponse.statusCode != 200) {
+            throw HttpException("Failed to update resource");
+          } else {
+            final Map map = json.decode(setCheckResponse.body);
+            if (map["set"]["id"] == setId) {
+              returnCards.add(e);
+            }
+
+          }
+          
+        }
+        return returnCards;
+      }
     } else {
       throw HttpException("Failed to update resource");
     }
@@ -38,6 +64,29 @@ class CardBriefService {
   }
 }
 
+class SetBriefService {
+  Future<List<SetBrief>> fetchSets() async {
+    final uri = Uri.https(
+      "api.tcgdex.net",
+      "/v2/en/sets"
+    );
+
+    final response = await get(uri);
+    List<SetBrief> sets = [];
+
+    if (response.statusCode == 200) {
+      Iterable list = json.decode(response.body);
+      for (final e in list) {
+        sets.add(SetBrief.fromJson(e));
+      }
+      return sets;
+    } else {
+      throw HttpException("Failed to update resource");
+    }
+
+  }
+
+}
 
 
 class CardBriefViewModel extends ChangeNotifier {
@@ -45,15 +94,16 @@ class CardBriefViewModel extends ChangeNotifier {
   String? errorMessage;
   bool loading = false;
 
-  List<CardBrief> _cardBriefs = [];
+  List<cards.CardBrief> _cardBriefs = [];
 
-  List<CardBrief> get cardBriefs => _cardBriefs;
+  List<cards.CardBrief> get cardBriefs => _cardBriefs;
 
-  Future<void> getCardBriefs(String name) async {
+
+  Future<void> getCardBriefs(String name, String? setId) async {
     loading = true;
     notifyListeners();
     try {
-      _cardBriefs = await _service.fetchCards(name);
+      _cardBriefs = await _service.fetchCards(name, setId);
       errorMessage = null;
 
 
@@ -66,31 +116,70 @@ class CardBriefViewModel extends ChangeNotifier {
     loading = false;
     notifyListeners();
   }
+
+}
+
+
+class SetBriefViewModel extends ChangeNotifier {
+  final SetBriefService _service = SetBriefService();
+  String? errorMessage;
+  bool loading = false;
+
+  List<SetBrief> _sets = [];
+  List<SetBrief> get sets => _sets;
+
+  SetBriefViewModel() {
+    getSets();
+  }
+
+
+  Future<void> getSets() async {
+    try {
+      _sets = await _service.fetchSets();
+      errorMessage = null;
+
+
+    } on HttpException catch (error) {
+      errorMessage = error.message;
+
+      print('Error loading article: ${error.message}');
+    }
+    notifyListeners();
+
+  }
+
+
 }
 
 
 class CardBriefView extends StatelessWidget {
   CardBriefView({super.key});
 
-  final CardBriefViewModel viewModel = CardBriefViewModel();
+  final CardBriefViewModel cardBriefViewModel = CardBriefViewModel();
+  final SetBriefViewModel setBriefViewModel = SetBriefViewModel();
 
   @override
   Widget build(BuildContext context) {
     return AppContainer(children: [
-          Center(
-            child: SearchWidget(onPressed: viewModel.getCardBriefs)
+          ListenableBuilder(
+            listenable: setBriefViewModel,
+            builder: (context, child) {
+              return Center(
+                child: SearchWidget(onPressed: cardBriefViewModel.getCardBriefs, sets: setBriefViewModel.sets)
+              );
+            }
           ),
           ListenableBuilder(
-            listenable: viewModel,
+            listenable: cardBriefViewModel,
             builder: (context, child) {
               return switch ((
-                viewModel.loading,
-                viewModel.cardBriefs,
-                viewModel.errorMessage
+                cardBriefViewModel.loading,
+                cardBriefViewModel.cardBriefs,
+                cardBriefViewModel.errorMessage
               )) {
                 (true, _, _) => LoadingIndicator(),
                 (false, _, String message) => Center(child: Text(message)),
-                (false, List<CardBrief> cardBriefs, null) => CardBriefPage(
+                (false, List<cards.CardBrief> cardBriefs, null) => CardBriefPage(
                   cardBriefs: cardBriefs,
                   //onPressed: viewModel.getCardBriefs
                 )
@@ -106,10 +195,9 @@ class CardBriefPage extends StatelessWidget {
   const CardBriefPage({
     super.key,
     required this.cardBriefs,
-    //required this.onPressed
   });
 
-  final List<CardBrief> cardBriefs;
+  final List<cards.CardBrief> cardBriefs;
   //final Function onPressed;
 
   @override
@@ -154,62 +242,11 @@ class CardBriefPage extends StatelessWidget {
 }
 
 
-class SearchWidget extends StatefulWidget {
-  const SearchWidget({super.key, required this.onPressed});
-
-  final Function onPressed;
-
-  @override
-  SearchWidgetState createState() {
-    return SearchWidgetState();
-  }
-}
-
-
-
-class SearchWidgetState extends State<SearchWidget> {  
-  TextEditingController controller = TextEditingController();
-
-  @override
-  void dispose() {
-    super.dispose();
-    controller.dispose();
-  }
-
-
-  @override
-  Widget build(BuildContext context) {
-    return FractionallySizedBox(
-      widthFactor: 0.5,
-      child: Row(
-        children: [
-          Expanded(child: TextField(
-              
-              controller: controller,
-              onSubmitted: (value) => widget.onPressed(value),
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'Enter a search term',
-              ),
-            )
-          ),
-          ElevatedButton(
-              onPressed: () => widget.onPressed(controller.text), 
-            child: Text("Search")
-          ),
-
-        ]
-      )
-    );
-
-  }
-}
-
 
 class CardBriefWidget extends StatelessWidget {
   const CardBriefWidget({super.key, required this.cardBrief});
 
-  final CardBrief cardBrief;
+  final cards.CardBrief cardBrief;
 
   @override
   Widget build(BuildContext context) {
