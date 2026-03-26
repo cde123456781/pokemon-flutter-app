@@ -250,25 +250,28 @@ class CardBriefWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: const Color.fromARGB(255, 211, 224, 230)),
-        borderRadius: BorderRadius.circular(20)
-      ),
-      padding: EdgeInsets.only(top: 10),
-      
-      child: Column(
-        children: [
-            Expanded(
-              child: Image.network(
-              "${cardBrief.image}/low.webp", 
-              fit: BoxFit.fill,
-              //loadingBuilder: (context, child, loadingProgress) => CircularProgressIndicator(),
-              errorBuilder: (context, error, stackTrace) => Icon(Icons.question_mark),
-            )),
-            Text(cardBrief.name)
-        ],
-      ),
-    );
+    return Container(child: Material(child: InkWell(
+      onTap: () => {},
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: const Color.fromARGB(255, 211, 224, 230)),
+          borderRadius: BorderRadius.circular(20)
+        ),
+        padding: EdgeInsets.only(top: 10),
+        
+        child: Column(
+          children: [
+              Expanded(
+                child: Image.network(
+                "${cardBrief.image}/low.webp", 
+                fit: BoxFit.fill,
+                //loadingBuilder: (context, child, loadingProgress) => CircularProgressIndicator(),
+                errorBuilder: (context, error, stackTrace) => Icon(Icons.question_mark),
+              )),
+              Text(cardBrief.name)
+          ],
+        ),
+      )
+    )));
   }
 }
