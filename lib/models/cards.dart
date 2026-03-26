@@ -11,7 +11,7 @@ abstract class Card {
     this.rarity,
     required this.set,
     required this.variants,
-    this.boosters,
+    required this.boosters,
     this.pricing,
     required this.updated,
   });
@@ -25,10 +25,64 @@ abstract class Card {
   final String? rarity;
   final SetBrief set;
   final Variants variants;
-  final List<Booster>? boosters;
+  final List<Booster> boosters;
   final Pricing? pricing;
   final String updated;
 
+
+  static Map<String, Object?> extractCardJsonValues(Map<String, Object?> json) {
+    String? image;
+    String? illustrator;
+    String? rarity;
+    List<Booster> boosters = [];
+    Pricing? pricing;
+
+    if (json.containsKey("image")) {
+      image = json["image"] as String;
+    }
+    if (json.containsKey("illustrator")) {
+      illustrator = json["illustrator"] as String;
+    }
+    if (json.containsKey("rarity")) {
+      rarity = json["rarity"] as String;
+    }
+    if (json.containsKey("boosters")) {
+      for (var booster in json["boosters"] as Iterable) {
+        boosters.add(Booster.fromJson(booster));
+      }
+    }
+    if (json.containsKey("pricing")) {
+      pricing = Pricing.fromJson(json["pricing"] as Map<String, Object?>);
+    }
+
+    return {
+      "id": json["id"] as String,
+      "localId": json["localId"] as String,
+      "name": json["name"] as String,
+      "image": image,
+      "category": json["category"] as String,
+      "illustrator": illustrator,
+      "rarity": rarity,
+      "set": SetBrief.fromJson(json["set"] as Map<String, Object?>),
+      "variants": Variants.fromJson(json["variants"] as Map<String, Object?>),
+      "boosters": boosters,
+      "pricing": pricing,
+      "updated": json["updated"] as String
+    };
+
+  }
+
+  factory Card.fromJson(Map<String, Object?> json) {
+    final category = json["category"] as String;
+    if (category == "Pokemon") {
+      return PokemonCard.fromJson(json);
+    } else if (category == "Energy") {
+      return EnergyCard.fromJson(json);
+    } else {
+      return TrainerCard.fromJson(json);
+    }
+  }
+  
 }
 
 
@@ -46,6 +100,30 @@ class Booster {
   final String? logo;
   final String? artworkFront;
   final String? artworkBack;
+
+  static Booster fromJson(Map<String, Object?> json) {
+    String? logo;
+    String? artworkBack;
+    String? artworkFront;
+
+    if (json.containsKey("logo")) {
+      logo = json["logo"] as String;
+    }
+    if (json.containsKey("artworkBack")) {
+      artworkBack = json["artworkBack"] as String;
+    }
+    if (json.containsKey("artworkFront")) {
+      artworkFront = json["artworkFront"] as String;
+    }
+
+    return Booster(
+      id: json["id"] as String,
+      name: json["name"] as String,
+      logo: logo,
+      artworkBack: artworkBack,
+      artworkFront: artworkFront
+    );
+  }
 }
 
 class Variants {
@@ -60,6 +138,15 @@ class Variants {
   final bool reverse;
   final bool holo;
   final bool firstEdition;
+
+  static Variants fromJson(Map<String, Object?> json) {
+    return Variants(
+      normal: json["normal"] as bool,
+      reverse: json["reverse"] as bool,
+      holo: json["holo"] as bool,
+      firstEdition: json["firstEdition"] as bool
+    );
+  }
 }
 
 
@@ -72,6 +159,24 @@ class Pricing {
 
   final TCGPlayer? tcgplayer;
   final Cardmarket? cardmarket;
+
+  static Pricing fromJson(Map<String, Object?> json) {
+    TCGPlayer? tcgPlayer;
+    Cardmarket? cardmarket;
+
+    if (json.containsKey("cardmarket")) {
+      cardmarket = Cardmarket.fromJson(json["cardmarket"] as Map<String, Object?>);
+    }
+
+    if (json.containsKey("tcgplayer")) {
+      tcgPlayer = TCGPlayer.fromJson(json["tcgplayer"] as Map<String, Object?>);
+    }
+
+    return Pricing(
+      cardmarket: cardmarket,
+      tcgplayer: tcgPlayer
+    );
+  }
 }
 
 class TCGPlayer {
@@ -89,8 +194,8 @@ class TCGPlayer {
   });
 
 
-  final num updated;
-  final num unit;
+  final String updated;
+  final String unit;
   final TCGPlayerVariant? normal;
   final TCGPlayerVariant? holofoil;
   final TCGPlayerVariant? reverseHolofoil;
@@ -98,6 +203,52 @@ class TCGPlayer {
   final TCGPlayerVariant? firstEditionHolofoil;
   final TCGPlayerVariant? unlimited;
   final TCGPlayerVariant? unlimitedHolofoil;
+
+  static TCGPlayer fromJson(Map<String, Object?> json) {
+    TCGPlayerVariant? normal;
+    TCGPlayerVariant? holofoil;
+    TCGPlayerVariant? reverseHolofoil;
+    TCGPlayerVariant? firstEdition;
+    TCGPlayerVariant? firstEditionHolofoil;
+    TCGPlayerVariant? unlimited;
+    TCGPlayerVariant? unlimitedHolofoil;
+
+    if (json.containsKey("normal")) {
+      normal = TCGPlayerVariant.fromjson(json["normal"] as Map<String, Object>);
+    }
+    if (json.containsKey("holofoil")) {
+      holofoil = TCGPlayerVariant.fromjson(json["holofoil"] as Map<String, Object>);
+    }
+    if (json.containsKey("reverse-holofoil")) {
+      reverseHolofoil = TCGPlayerVariant.fromjson(json["reverse-holofoil"] as Map<String, Object>);
+    }
+    if (json.containsKey("1st-edition")) {
+      firstEdition = TCGPlayerVariant.fromjson(json["1st-edition"] as Map<String, Object>);
+    }
+    if (json.containsKey("1st-edition-holofoil")) {
+      firstEditionHolofoil = TCGPlayerVariant.fromjson(json["1st-edition-holofoil"] as Map<String, Object>);
+    }
+    if (json.containsKey("unlimited")) {
+      unlimited = TCGPlayerVariant.fromjson(json["unlimited"] as Map<String, Object>);
+    }
+    if (json.containsKey("unlimited-holofoil")) {
+      unlimitedHolofoil = TCGPlayerVariant.fromjson(json["unlimited-holofoil"] as Map<String, Object>);
+    }
+
+    return TCGPlayer(
+      unit: json["unit"] as String,
+      updated: json["updated"] as String,
+      normal: normal,
+      holofoil: holofoil,
+      reverseHolofoil: reverseHolofoil,
+      firstEdition: firstEdition,
+      firstEditionHolofoil: firstEditionHolofoil,
+      unlimited: unlimited,
+      unlimitedHolofoil: unlimitedHolofoil
+    );
+
+
+  }
 
 }
 
@@ -115,6 +266,38 @@ class TCGPlayerVariant {
   final num? highPrice;
   final num? marketPrice;
   final num? directLowPrice;
+
+  static TCGPlayerVariant fromjson(Map<String, Object?> json) {
+    num? lowPrice;
+    num? midPrice;
+    num? highPrice;
+    num? marketPrice;
+    num? directLowPrice;
+
+    if (json.containsKey("lowPrice")) {
+      lowPrice = json["lowPrice"] as num;
+    }
+    if (json.containsKey("midPrice")) {
+      midPrice = json["midPrice"] as num;
+    }
+    if (json.containsKey("highPrice")) {
+      highPrice = json["highPrice"] as num;
+    }
+    if (json.containsKey("marketPrice")) {
+      marketPrice = json["marketPrice"] as num;
+    }
+    if (json.containsKey("directLowPrice")) {
+      directLowPrice = json["directLowPrice"] as num;
+    }
+
+    return TCGPlayerVariant(
+      lowPrice: lowPrice,
+      midPrice: midPrice,
+      highPrice: highPrice,
+      marketPrice: marketPrice,
+      directLowPrice: directLowPrice
+    );
+  }
 }
 
 
@@ -136,8 +319,8 @@ class Cardmarket {
     this.avg30Holo
   });
 
-  final num? updated;
-  final num? unit;
+  final String? updated;
+  final String? unit;
   final num? avg;
   final num? low;
   final num? trend;
@@ -151,6 +334,85 @@ class Cardmarket {
   final num? avg7Holo;
   final num? avg30Holo;
 
+
+  static Cardmarket fromJson(Map<String, Object?> json) {
+    String? updated;
+    String? unit;
+    num? avg;
+    num? low;
+    num? trend;
+    num? avg1;
+    num? avg7;
+    num? avg30;
+    num? avgHolo;
+    num? lowHolo;
+    num? trendHolo;
+    num? avg1Holo;
+    num? avg7Holo;
+    num? avg30Holo;
+
+    if (json.containsKey("updated")) {
+      updated = json["updated"] as String;
+    }
+    if (json.containsKey("unit")) {
+      unit = json["unit"] as String;
+    }
+    if (json.containsKey("avg")) {
+      avg = json["avg"] as num;
+    }
+    if (json.containsKey("low")) {
+      low = json["low"] as num;
+    }
+    if (json.containsKey("trend")) {
+      trend = json["trend"] as num;
+    }
+    if (json.containsKey("avg1")) {
+      avg1 = json["avg1"] as num;
+    }
+    if (json.containsKey("avg7")) {
+      avg7 = json["avg7"] as num;
+    }
+    if (json.containsKey("avg30")) {
+      avg30 = json["avg30"] as num;
+    }
+    if (json.containsKey("avg-holo")) {
+      avgHolo = json["avg-holo"] as num;
+    }
+    if (json.containsKey("low-holo")) {
+      lowHolo = json["low-holo"] as num;
+    }
+    if (json.containsKey("trend-holo")) {
+      trendHolo = json["trend-holo"] as num;
+    }
+    if (json.containsKey("avg1-holo")) {
+      avg1Holo = json["avg1-holo"] as num;
+    }
+    if (json.containsKey("avg7-holo")) {
+      avg7Holo = json["avg7-holo"] as num;
+    }
+    if (json.containsKey("avg30-holo")) {
+      avg30Holo = json["avg30-holo"] as num;
+    }
+
+
+    return Cardmarket(
+      updated: updated,
+      unit: unit,
+      avg: avg,
+      low: low,
+      trend: trend,
+      avg1: avg1,
+      avg7: avg7,
+      avg30: avg30,
+      avgHolo: avgHolo,
+      lowHolo: lowHolo,
+      trendHolo: trendHolo,
+      avg1Holo: avg1Holo,
+      avg7Holo: avg7Holo,
+      avg30Holo: avg30Holo
+
+    );
+  }
 
 }
 
@@ -166,14 +428,14 @@ class PokemonCard extends Card {
     super.rarity,
     required super.set,
     required super.variants,
-    super.boosters,
+    required super.boosters,
     super.pricing,
     required super.updated,
 
 
-    this.dexId,
-    this.hp,
-    this.types,
+    required this.dexId,
+    this.hp,  
+    required this.types,
     this.evolveFrom,
     this.description,
     this.level,
@@ -184,15 +446,89 @@ class PokemonCard extends Card {
   });
 
 
-  final List<num>? dexId;
+  final List<num> dexId;
   final num? hp;
-  final List<String>? types;
+  final List<String> types;
   final String? evolveFrom;
   final String? description;
   final String? level;
   final String? stage;
   final String? suffix;
   final Item? item;
+
+  static PokemonCard fromJson(Map<String, Object?> json) {
+    final cardDetails = Card.extractCardJsonValues(json);
+
+
+    List<num> dexId = [];
+    num? hp;
+    List<String> types = [];
+    String? evolveFrom;
+    String? description;
+    String? level;
+    String? stage;
+    String? suffix;
+    Item? item;
+
+    if (json.containsKey("dexId")) {
+      for (var i in json["dexId"] as List<num>) {
+        dexId.add(i);
+      }
+    }
+    if (json.containsKey("hp")) {
+      hp = json["hp"] as num;
+    }
+    if (json.containsKey("types")) {
+      for (var i in json["types"] as List<String>) {
+        types.add(i);
+      }
+    }
+    if (json.containsKey("evolveFrom")) {
+      evolveFrom = json["evolveFrom"] as String;
+    }
+    if (json.containsKey("description")) {
+      description = json["description"] as String;
+    }
+    if (json.containsKey("level")) {
+      level = json["level"] as String;
+    }
+    if (json.containsKey("stage")) {
+      stage = json["stage"] as String;
+    }
+    if (json.containsKey("suffix")) {
+      suffix = json["suffix"] as String;
+    }
+    if (json.containsKey("item")) {
+      item = Item.fromJson(json["item"] as Map<String, Object?>);
+    }
+
+    
+    
+    return PokemonCard(
+      id: cardDetails["id"] as String, 
+      localId: cardDetails["localId"] as String, 
+      name: cardDetails["name"] as String, 
+      image: cardDetails["image"] as String?, 
+      category: "Pokemon",
+      illustrator: cardDetails["illustrator"] as String?,
+      rarity: cardDetails["rarity"] as String?,
+      set: cardDetails["set"] as SetBrief,
+      variants: cardDetails["variants"] as Variants,
+      boosters: cardDetails["boosters"] as List<Booster>,
+      pricing: cardDetails["pricing"] as Pricing?,
+      updated: cardDetails["updated"] as String,
+
+      dexId: dexId,
+      hp: hp,
+      types: types,
+      evolveFrom: evolveFrom,
+      description: description,
+      level: level,
+      stage: stage,
+      suffix: suffix,
+      item: item
+    );
+  }
 }
 
 class EnergyCard extends Card {
@@ -206,7 +542,7 @@ class EnergyCard extends Card {
     super.rarity,
     required super.set,
     required super.variants,
-    super.boosters,
+    required super.boosters,
     super.pricing,
     required super.updated,
 
@@ -219,6 +555,29 @@ class EnergyCard extends Card {
 
   final String effect;
   final String energyType;
+
+  static EnergyCard fromJson(Map<String, Object?> json) {
+    final cardDetails = Card.extractCardJsonValues(json);
+
+    return EnergyCard(
+      id: cardDetails["id"] as String, 
+      localId: cardDetails["localId"] as String, 
+      name: cardDetails["name"] as String, 
+      image: cardDetails["image"] as String?, 
+      category: "Pokemon",
+      illustrator: cardDetails["illustrator"] as String?,
+      rarity: cardDetails["rarity"] as String?,
+      set: cardDetails["set"] as SetBrief,
+      variants: cardDetails["variants"] as Variants,
+      boosters: cardDetails["boosters"] as List<Booster>,
+      pricing: cardDetails["pricing"] as Pricing?,
+      updated: cardDetails["updated"] as String,
+
+      effect: json["effect"] as String,
+      energyType: json["energyType"] as String
+    );
+
+  }
 }
 
 class TrainerCard extends Card {
@@ -232,7 +591,7 @@ class TrainerCard extends Card {
     super.rarity,
     required super.set,
     required super.variants,
-    super.boosters,
+    required super.boosters,
     super.pricing,
     required super.updated,
 
@@ -245,6 +604,31 @@ class TrainerCard extends Card {
 
   final String effect;
   final String trainerType;
+
+
+  static TrainerCard fromJson(Map<String, Object?> json) {
+    final cardDetails = Card.extractCardJsonValues(json);
+
+    return TrainerCard(
+      id: cardDetails["id"] as String, 
+      localId: cardDetails["localId"] as String, 
+      name: cardDetails["name"] as String, 
+      image: cardDetails["image"] as String?, 
+      category: "Pokemon",
+      illustrator: cardDetails["illustrator"] as String?,
+      rarity: cardDetails["rarity"] as String?,
+      set: cardDetails["set"] as SetBrief,
+      variants: cardDetails["variants"] as Variants,
+      boosters: cardDetails["boosters"] as List<Booster>,
+      pricing: cardDetails["pricing"] as Pricing?,
+      updated: cardDetails["updated"] as String,
+
+      effect: json["effect"] as String,
+      trainerType: json["trainerType"] as String
+    );
+
+  }
+  
 }
 
 
@@ -257,6 +641,13 @@ class Item {
 
   final String name;
   final String effect;
+
+  static Item fromJson(Map<String, Object?> json) {
+    return Item(
+      name: json["name"] as String,
+      effect: json["effect"] as String
+    );
+  }
 }
 
 class CardBrief {
