@@ -37,23 +37,31 @@ abstract class Card {
     List<Booster> boosters = [];
     Pricing? pricing;
 
+    print(json);
+
     if (json.containsKey("image")) {
-      image = json["image"] as String;
+      image = json["image"] as String?;
     }
     if (json.containsKey("illustrator")) {
-      illustrator = json["illustrator"] as String;
+      illustrator = json["illustrator"] as String?;
     }
     if (json.containsKey("rarity")) {
-      rarity = json["rarity"] as String;
+      rarity = json["rarity"] as String?;
     }
     if (json.containsKey("boosters")) {
-      for (var booster in json["boosters"] as Iterable) {
+      for (var booster in json["boosters"] as Iterable? ?? []) {
         boosters.add(Booster.fromJson(booster));
       }
     }
+
     if (json.containsKey("pricing")) {
-      pricing = Pricing.fromJson(json["pricing"] as Map<String, Object?>);
+      print(json["pricing"]);
+      if (json["pricing"] != null) {
+        pricing = Pricing.fromJson(json["pricing"] as Map<String, Object?>);
+      }
     }
+
+    print("DOES THIS WORK?");
 
     return {
       "id": json["id"] as String,
@@ -107,13 +115,13 @@ class Booster {
     String? artworkFront;
 
     if (json.containsKey("logo")) {
-      logo = json["logo"] as String;
+      logo = json["logo"] as String?;
     }
     if (json.containsKey("artworkBack")) {
-      artworkBack = json["artworkBack"] as String;
+      artworkBack = json["artworkBack"] as String?;
     }
     if (json.containsKey("artworkFront")) {
-      artworkFront = json["artworkFront"] as String;
+      artworkFront = json["artworkFront"] as String?;
     }
 
     return Booster(
@@ -164,13 +172,21 @@ class Pricing {
     TCGPlayer? tcgPlayer;
     Cardmarket? cardmarket;
 
+    print("We're in pricing");
+
     if (json.containsKey("cardmarket")) {
-      cardmarket = Cardmarket.fromJson(json["cardmarket"] as Map<String, Object?>);
+      if (json["cardmarket"] != null) {
+        cardmarket = Cardmarket.fromJson(json["cardmarket"] as Map<String, Object?>);
+      }
     }
 
+
     if (json.containsKey("tcgplayer")) {
-      tcgPlayer = TCGPlayer.fromJson(json["tcgplayer"] as Map<String, Object?>);
+      if (json["tcgplayer"] != null) {
+        tcgPlayer = TCGPlayer.fromJson(json["tcgplayer"] as Map<String, Object?>);
+      }
     }
+
 
     return Pricing(
       cardmarket: cardmarket,
@@ -214,25 +230,39 @@ class TCGPlayer {
     TCGPlayerVariant? unlimitedHolofoil;
 
     if (json.containsKey("normal")) {
-      normal = TCGPlayerVariant.fromjson(json["normal"] as Map<String, Object>);
+      if (json["normal"] != null) {
+        normal = TCGPlayerVariant.fromJson(json["normal"] as Map<String, Object?>);
+      }
     }
     if (json.containsKey("holofoil")) {
-      holofoil = TCGPlayerVariant.fromjson(json["holofoil"] as Map<String, Object>);
+      if (json["holofoil"] != null) {
+        holofoil = TCGPlayerVariant.fromJson(json["holofoil"] as Map<String, Object?>);
+      }
     }
     if (json.containsKey("reverse-holofoil")) {
-      reverseHolofoil = TCGPlayerVariant.fromjson(json["reverse-holofoil"] as Map<String, Object>);
+      if (json["reverse-holofoil"] != null) {
+        reverseHolofoil = TCGPlayerVariant.fromJson(json["reverse-holofoil"] as Map<String, Object?>);
+      }
     }
     if (json.containsKey("1st-edition")) {
-      firstEdition = TCGPlayerVariant.fromjson(json["1st-edition"] as Map<String, Object>);
+      if (json["1st-edition"] != null) {
+        firstEdition = TCGPlayerVariant.fromJson(json["1st-edition"] as Map<String, Object?>);
+      }
     }
     if (json.containsKey("1st-edition-holofoil")) {
-      firstEditionHolofoil = TCGPlayerVariant.fromjson(json["1st-edition-holofoil"] as Map<String, Object>);
+      if (json["1st-edition-holofoil"] != null) {
+        firstEditionHolofoil = TCGPlayerVariant.fromJson(json["1st-edition-holofoil"] as Map<String, Object?>);
+      }
     }
     if (json.containsKey("unlimited")) {
-      unlimited = TCGPlayerVariant.fromjson(json["unlimited"] as Map<String, Object>);
+      if (json["unlimited"] != null) {
+        unlimited = TCGPlayerVariant.fromJson(json["unlimited"] as Map<String, Object?>);
+      }
     }
     if (json.containsKey("unlimited-holofoil")) {
-      unlimitedHolofoil = TCGPlayerVariant.fromjson(json["unlimited-holofoil"] as Map<String, Object>);
+      if (json["unlimited-holofoil"] != null) {
+        unlimitedHolofoil = TCGPlayerVariant.fromJson(json["unlimited-holofoil"] as Map<String, Object?>);
+      }
     }
 
     return TCGPlayer(
@@ -267,7 +297,7 @@ class TCGPlayerVariant {
   final num? marketPrice;
   final num? directLowPrice;
 
-  static TCGPlayerVariant fromjson(Map<String, Object?> json) {
+  static TCGPlayerVariant fromJson(Map<String, Object?> json) {
     num? lowPrice;
     num? midPrice;
     num? highPrice;
@@ -275,20 +305,21 @@ class TCGPlayerVariant {
     num? directLowPrice;
 
     if (json.containsKey("lowPrice")) {
-      lowPrice = json["lowPrice"] as num;
+      lowPrice = json["lowPrice"] as num?;
     }
     if (json.containsKey("midPrice")) {
-      midPrice = json["midPrice"] as num;
+      midPrice = json["midPrice"] as num?;
     }
     if (json.containsKey("highPrice")) {
-      highPrice = json["highPrice"] as num;
+      highPrice = json["highPrice"] as num?;
     }
     if (json.containsKey("marketPrice")) {
-      marketPrice = json["marketPrice"] as num;
+      marketPrice = json["marketPrice"] as num?;
     }
     if (json.containsKey("directLowPrice")) {
-      directLowPrice = json["directLowPrice"] as num;
+      directLowPrice = json["directLowPrice"] as num?;
     }
+
 
     return TCGPlayerVariant(
       lowPrice: lowPrice,
@@ -351,47 +382,48 @@ class Cardmarket {
     num? avg7Holo;
     num? avg30Holo;
 
+
     if (json.containsKey("updated")) {
-      updated = json["updated"] as String;
+      updated = json["updated"] as String?;
     }
     if (json.containsKey("unit")) {
-      unit = json["unit"] as String;
+      unit = json["unit"] as String?;
     }
     if (json.containsKey("avg")) {
-      avg = json["avg"] as num;
+      avg = json["avg"] as num?;
     }
     if (json.containsKey("low")) {
-      low = json["low"] as num;
+      low = json["low"] as num?;
     }
     if (json.containsKey("trend")) {
-      trend = json["trend"] as num;
+      trend = json["trend"] as num?;
     }
     if (json.containsKey("avg1")) {
-      avg1 = json["avg1"] as num;
+      avg1 = json["avg1"] as num?;
     }
     if (json.containsKey("avg7")) {
-      avg7 = json["avg7"] as num;
+      avg7 = json["avg7"] as num?;
     }
     if (json.containsKey("avg30")) {
-      avg30 = json["avg30"] as num;
+      avg30 = json["avg30"] as num?;
     }
     if (json.containsKey("avg-holo")) {
-      avgHolo = json["avg-holo"] as num;
+      avgHolo = json["avg-holo"] as num?;
     }
     if (json.containsKey("low-holo")) {
-      lowHolo = json["low-holo"] as num;
+      lowHolo = json["low-holo"] as num?;
     }
     if (json.containsKey("trend-holo")) {
-      trendHolo = json["trend-holo"] as num;
+      trendHolo = json["trend-holo"] as num?;
     }
     if (json.containsKey("avg1-holo")) {
-      avg1Holo = json["avg1-holo"] as num;
+      avg1Holo = json["avg1-holo"] as num?;
     }
     if (json.containsKey("avg7-holo")) {
-      avg7Holo = json["avg7-holo"] as num;
+      avg7Holo = json["avg7-holo"] as num?;
     }
     if (json.containsKey("avg30-holo")) {
-      avg30Holo = json["avg30-holo"] as num;
+      avg30Holo = json["avg30-holo"] as num?;
     }
 
 
@@ -460,6 +492,8 @@ class PokemonCard extends Card {
     final cardDetails = Card.extractCardJsonValues(json);
 
 
+    print("ABC");
+
     List<num> dexId = [];
     num? hp;
     List<String> types = [];
@@ -471,36 +505,41 @@ class PokemonCard extends Card {
     Item? item;
 
     if (json.containsKey("dexId")) {
-      for (var i in json["dexId"] as List<num>) {
+      for (var i in json["dexId"] as Iterable? ?? []) {
         dexId.add(i);
       }
     }
+
     if (json.containsKey("hp")) {
-      hp = json["hp"] as num;
+      hp = json["hp"] as num?;
     }
     if (json.containsKey("types")) {
-      for (var i in json["types"] as List<String>) {
+      for (var i in json["types"] as Iterable? ?? []) {
         types.add(i);
       }
     }
     if (json.containsKey("evolveFrom")) {
-      evolveFrom = json["evolveFrom"] as String;
+      evolveFrom = json["evolveFrom"] as String?;
     }
     if (json.containsKey("description")) {
-      description = json["description"] as String;
+      description = json["description"] as String?;
     }
     if (json.containsKey("level")) {
-      level = json["level"] as String;
+      level = json["level"] as String?;
     }
     if (json.containsKey("stage")) {
-      stage = json["stage"] as String;
+      stage = json["stage"] as String?;
     }
     if (json.containsKey("suffix")) {
-      suffix = json["suffix"] as String;
+      suffix = json["suffix"] as String?;
     }
     if (json.containsKey("item")) {
-      item = Item.fromJson(json["item"] as Map<String, Object?>);
+      if (json["item"] != null) {
+        item = Item.fromJson(json["item"] as Map<String, Object?>);
+      }
     }
+
+    print("MADE IT HERE");
 
     
     
@@ -547,17 +586,23 @@ class EnergyCard extends Card {
     required super.updated,
 
     
-    required this.effect,
+    this.effect,
     required this.energyType
      
   });
 
 
-  final String effect;
+  final String? effect;
   final String energyType;
 
   static EnergyCard fromJson(Map<String, Object?> json) {
     final cardDetails = Card.extractCardJsonValues(json);
+
+    String? effect;
+    
+    if (json.containsKey("effect")) {
+      effect = json["effect"] as String?;
+    }
 
     return EnergyCard(
       id: cardDetails["id"] as String, 
@@ -573,7 +618,7 @@ class EnergyCard extends Card {
       pricing: cardDetails["pricing"] as Pricing?,
       updated: cardDetails["updated"] as String,
 
-      effect: json["effect"] as String,
+      effect: effect,
       energyType: json["energyType"] as String
     );
 
@@ -596,18 +641,24 @@ class TrainerCard extends Card {
     required super.updated,
 
     
-    required this.effect,
+    this.effect,
     required this.trainerType
      
   });
 
 
-  final String effect;
+  final String? effect;
   final String trainerType;
 
 
   static TrainerCard fromJson(Map<String, Object?> json) {
     final cardDetails = Card.extractCardJsonValues(json);
+
+    String? effect;
+    
+    if (json.containsKey("effect")) {
+      effect = json["effect"] as String?;
+    }
 
     return TrainerCard(
       id: cardDetails["id"] as String, 
@@ -623,7 +674,7 @@ class TrainerCard extends Card {
       pricing: cardDetails["pricing"] as Pricing?,
       updated: cardDetails["updated"] as String,
 
-      effect: json["effect"] as String,
+      effect: effect,
       trainerType: json["trainerType"] as String
     );
 
