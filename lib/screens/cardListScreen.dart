@@ -251,7 +251,9 @@ class CardBriefWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(child: Material(child: InkWell(
-      onTap: () => {},
+      onTap: () => {
+        Navigator.pushNamed(context, '/details', arguments: cardBrief.id)
+      },
       child: Container(
         decoration: BoxDecoration(
           border: Border.all(color: const Color.fromARGB(255, 211, 224, 230)),
