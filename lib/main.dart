@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pokemon_app/screens/cardDetailScreen.dart';
 import 'package:pokemon_app/screens/cardListScreen.dart';
 import 'package:pokemon_app/screens/setListScreen.dart';
 
@@ -19,7 +20,7 @@ class MainApp extends StatelessWidget {
       theme: ThemeData(primarySwatch: Colors.blue),
       routes: {
         "/": (context) => CardBriefView(),
-        "/details": (context) => Text("Test"),
+        "/details": (context) => CardView(),
         "/sets": (context) => SeriesView()
       },
       title: "Flutter Pokemon",
