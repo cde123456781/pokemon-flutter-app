@@ -6,8 +6,8 @@ import 'package:http/http.dart';
 import "dart:convert";
 
 import 'package:pokemon_app/models/cards.dart' as cards;
-
-import 'package:responsive_framework/responsive_framework.dart';
+import 'package:pokemon_app/widgets/appContainer.dart';
+import 'package:pokemon_app/widgets/loadingIndicator.dart';
 
 
 class CardService {
@@ -22,8 +22,10 @@ class CardService {
     cards.Card card;
 
     if (response.statusCode == 200) {
-      card = json.decode(response.body);
-
+      var body = json.decode(response.body);
+      card = cards.Card.fromJson(body);
+      print(card);
+      print(card is cards.PokemonCard);
       return card;
     } else {
       throw HttpException("Failed to update resource");
@@ -39,12 +41,12 @@ class CardViewModel extends ChangeNotifier {
   String? errorMessage;
   bool loading = false;
 
-  late cards.Card _card;
+  cards.Card? _card;
 
-  cards.Card get card => _card;
+  cards.Card? get card => _card;
 
-  CardViewModel() {
-    getCard(ModalRoute.of(context)!.settings.arguments as Car);
+  CardViewModel(String id) {
+    getCard(id);
   }
 
   Future<void> getCard(String id) async {
@@ -67,20 +69,16 @@ class CardViewModel extends ChangeNotifier {
 }
 
 
-class CardView extends StatelessWidget {
-  CardView({super.key});
 
-  final CardViewModel viewModel = CardViewModel();
+class CardView extends StatelessWidget {
+  const CardView({super.key});
+
+  
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(viewModel.card.name),
-        actions: []
-      ),
-      body: Column(
-        children: [
+    final CardViewModel viewModel = CardViewModel((ModalRoute.of(context)!.settings.arguments as String));
+    return AppContainer(children: [
           ListenableBuilder(
             listenable: viewModel,
             builder: (context, child) {
@@ -89,7 +87,8 @@ class CardView extends StatelessWidget {
                 viewModel.card,
                 viewModel.errorMessage
               )) {
-                (true, _, _) => Container(alignment: Alignment.center ,child: CircularProgressIndicator()),
+                (true, _, _) => LoadingIndicator(),
+                (false, null, null) => LoadingIndicator(),
                 (false, _, String message) => Center(child: Text(message)),
                 (false, cards.Card card, null) => CardPage(
                   card: card,
@@ -99,9 +98,7 @@ class CardView extends StatelessWidget {
             }
               
           )
-        ]
-      )
-    );
+        ]);
   }
 }
 
@@ -119,34 +116,13 @@ class CardPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
 
-      child: 
-        switch (card.isNotEmpty) {
-          (true) => Flexible(
+      child: Flexible(
           child: Center(
-            child: ResponsiveGridView.builder(
-  
-              scrollDirection: Axis.vertical,
-              shrinkWrap: true,
-              physics: ScrollPhysics(),
-              gridDelegate: ResponsiveGridDelegate(
-                crossAxisExtent: 150,
-                crossAxisSpacing: 30,
-                mainAxisSpacing: 10
-
-                
-              ),
-              itemBuilder: (BuildContext context, int index) {  
-                return CardBriefWidget(cardBrief: cardBriefs[index]);
-              },
-              itemCount: cardBriefs.length,
-            ), 
-    
+   
               
 
           )
-        ),
-        (false) => Text("No results found")
-        }
+        )
       
     
     );
