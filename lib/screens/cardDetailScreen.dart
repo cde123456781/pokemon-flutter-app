@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart';
 
 import "dart:convert";
@@ -71,13 +72,17 @@ class CardViewModel extends ChangeNotifier {
 
 
 class CardView extends StatelessWidget {
-  const CardView({super.key});
+  const CardView({super.key, this.goRouterState});
+
+  final GoRouterState? goRouterState;
+
 
   
 
   @override
   Widget build(BuildContext context) {
-    final CardViewModel viewModel = CardViewModel((ModalRoute.of(context)!.settings.arguments as String));
+    final String cardId = goRouterState!.pathParameters["cardId"] as String;
+    final CardViewModel viewModel = CardViewModel(cardId);
     return AppContainer(children: [
           ListenableBuilder(
             listenable: viewModel,
@@ -88,7 +93,7 @@ class CardView extends StatelessWidget {
                 viewModel.errorMessage
               )) {
                 (true, _, _) => LoadingIndicator(),
-                (false, null, null) => LoadingIndicator(),
+                (false, null, _) => Center(child: Text("Card does not exist")),
                 (false, _, String message) => Center(child: Text(message)),
                 (false, cards.Card card, null) => CardPage(
                   card: card,

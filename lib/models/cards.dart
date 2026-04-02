@@ -37,7 +37,6 @@ abstract class Card {
     List<Booster> boosters = [];
     Pricing? pricing;
 
-    print(json);
 
     if (json.containsKey("image")) {
       image = json["image"] as String?;
@@ -55,13 +54,11 @@ abstract class Card {
     }
 
     if (json.containsKey("pricing")) {
-      print(json["pricing"]);
       if (json["pricing"] != null) {
         pricing = Pricing.fromJson(json["pricing"] as Map<String, Object?>);
       }
     }
 
-    print("DOES THIS WORK?");
 
     return {
       "id": json["id"] as String,
@@ -172,7 +169,6 @@ class Pricing {
     TCGPlayer? tcgPlayer;
     Cardmarket? cardmarket;
 
-    print("We're in pricing");
 
     if (json.containsKey("cardmarket")) {
       if (json["cardmarket"] != null) {
@@ -492,8 +488,6 @@ class PokemonCard extends Card {
     final cardDetails = Card.extractCardJsonValues(json);
 
 
-    print("ABC");
-
     List<num> dexId = [];
     num? hp;
     List<String> types = [];
@@ -539,7 +533,7 @@ class PokemonCard extends Card {
       }
     }
 
-    print("MADE IT HERE");
+  
 
     
     

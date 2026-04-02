@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class Sidebar extends StatelessWidget {
   const Sidebar({super.key});
@@ -23,7 +24,7 @@ class Sidebar extends StatelessWidget {
                 // Update the state of the app
                 // Then close the drawer
                 Navigator.pop(context);
-                Navigator.pushNamed(context, '/');
+                context.goNamed("cards");
               },
             ),
             ListTile(
@@ -32,7 +33,7 @@ class Sidebar extends StatelessWidget {
                 // Update the state of the app
                 // Then close the drawer
                 Navigator.pop(context);
-                Navigator.pushNamed(context, '/sets');
+                context.goNamed("sets");
               },
             ),
 

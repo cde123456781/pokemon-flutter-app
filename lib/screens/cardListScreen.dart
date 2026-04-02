@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart';
 
 import "dart:convert";
@@ -23,43 +24,47 @@ class CardBriefService {
       {"name": name}
     );
 
+    final setUri = Uri.https(
+      "api.tcgdex.net",
+      "/v2/en/sets/${setId}",
+    );
 
-
-    final response = await get(uri);
     List<cards.CardBrief> retrievedCards = [];
+    
 
-    if (response.statusCode == 200) {
-      Iterable list = json.decode(response.body);
-      for (final e in list) {
-        retrievedCards.add(cards.CardBrief.fromJson(e));
-      }
+    if (setId == null) {
+      final response = await get(uri);
+      if (response.statusCode == 200) {
 
-      if (setId == null) {
-        return retrievedCards;
-      } else {
-        List<cards.CardBrief> returnCards = [];
-        for (final e in retrievedCards) {
-          var setCheckUri = Uri.https(
-            "api.tcgdex.net",
-            "/v2/en/cards/${e.id}",
-          );
-          var setCheckResponse = await get(setCheckUri);
-          if (setCheckResponse.statusCode != 200) {
-            throw HttpException("Failed to update resource");
-          } else {
-            final Map map = json.decode(setCheckResponse.body);
-            if (map["set"]["id"] == setId) {
-              returnCards.add(e);
-            }
-
-          }
-          
+        Iterable list = json.decode(response.body);
+        for (final e in list) {
+          retrievedCards.add(cards.CardBrief.fromJson(e));
         }
-        return returnCards;
+        
+        return retrievedCards;
+          
+      } else {
+        throw HttpException("Failed to update resource");
       }
+
     } else {
-      throw HttpException("Failed to update resource");
+      List<cards.CardBrief> returnCards = [];
+      final response = await get(setUri);
+      if (response.statusCode == 200) {
+        Set set = Set.fromJson(json.decode(response.body));
+        for (var i in set.cards) {
+          if (i.name.toLowerCase().contains(name.trim().toLowerCase())) {
+            returnCards.add(i);
+          }
+        }
+
+        return returnCards;
+
+      } else {
+        throw HttpException("Failed to update resource");
+      }
     }
+    
 
   }
 }
@@ -160,7 +165,7 @@ class CardBriefView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppContainer(children: [
+    return Column(children: [
           ListenableBuilder(
             listenable: setBriefViewModel,
             builder: (context, child) {
@@ -206,8 +211,7 @@ class CardBriefPage extends StatelessWidget {
 
       child: 
         switch (cardBriefs.isNotEmpty) {
-          (true) => Flexible(
-          child: Center(
+          (true) => Expanded(
             child: ResponsiveGridView.builder(
   
               scrollDirection: Axis.vertical,
@@ -226,9 +230,6 @@ class CardBriefPage extends StatelessWidget {
               itemCount: cardBriefs.length,
             ), 
     
-              
-
-          )
         ),
         (false) => Text("No results found")
         }
@@ -252,7 +253,7 @@ class CardBriefWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(child: Material(child: InkWell(
       onTap: () => {
-        Navigator.pushNamed(context, '/details', arguments: cardBrief.id)
+        context.pushNamed("cardDetails", pathParameters: {"cardId": cardBrief.id})
       },
       child: Container(
         decoration: BoxDecoration(

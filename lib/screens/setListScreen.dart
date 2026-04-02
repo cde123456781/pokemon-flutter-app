@@ -121,9 +121,7 @@ class SeriesView extends StatelessWidget {
   Widget build(BuildContext context) {
 
 
-    return AppContainer(
-      children: [
-          ListenableBuilder(
+    return ListenableBuilder(
             listenable: viewModel,
             builder: (context, child) {
               return switch ((
@@ -140,10 +138,7 @@ class SeriesView extends StatelessWidget {
               };
             }
               
-          )
-        ]
-    
-    );
+          );
   }
 }
 

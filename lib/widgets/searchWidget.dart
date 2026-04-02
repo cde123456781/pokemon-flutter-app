@@ -33,7 +33,7 @@ class SearchWidgetState extends State<SearchWidget> {
 
     
     return FractionallySizedBox(
-      widthFactor: 0.5,
+      widthFactor: 0.8,
       child: Form(
         key: _formKey,
         child: Row(

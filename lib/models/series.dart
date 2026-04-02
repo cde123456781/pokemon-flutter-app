@@ -47,4 +47,12 @@ class SerieBrief {
 
   final String id;
   final String name;
+
+
+  static SerieBrief fromJson(Map<String, dynamic> json) {
+    return SerieBrief(
+      id: json["id"] as String,
+      name: json["name"] as String
+    );
+  }
 }
