@@ -221,7 +221,6 @@ class EnergyWidePage extends StatelessWidget {
 
 
 Widget buildWidePage(cards.Card card, List<Widget> additional) {
-  DefaultTabController tabController = DefaultTabController(length: 4, child: Scaffold());
   return SizedBox.expand(
       child: FractionallySizedBox(
       heightFactor: 0.8,
@@ -240,34 +239,7 @@ Widget buildWidePage(cards.Card card, List<Widget> additional) {
         ),
         Expanded(
 
-          child: Column(
-            children: [
-              Expanded(
-                child: ListView(
-                  shrinkWrap: true,
-                  children: [
-                    Material(child: ListTile(leading: Text("Name"), title: Align(alignment: Alignment.centerRight, child: Text(card.name)),)),
-                    Material(child: ListTile(leading: Text("Category"), title: Align(alignment: Alignment.centerRight, child: Text(card.category)))),
-                    Material(child: ListTile(leading: Text("Illustrator"), title: Align(alignment: Alignment.centerRight, child: Text(card.illustrator ?? "Not Found")))),
-                    Material(child: ListTile(leading: Text("Rarity"), title: Align(alignment: Alignment.centerRight, child: Text(card.rarity ?? "Not Found")))),
-                    Material(child: ListTile(leading: Text("Set"), title: Align(alignment: Alignment.centerRight, child: Text(card.set.name)), trailing: Image.network("${card.set.symbol}.webp", 
-                      fit: BoxFit.scaleDown,
-                      errorBuilder: (context, error, stackTrace) => Text(""),
-                    ))),
-
-                    Material(child: Divider()),
-                    ...getVariants(card),
-                    Material(child: Divider()),
-                    ...getPricing(card),
-
-                    
-
-
-                  ]
-                )
-              )
-            ]
-          )
+          child: NestedTabBar(card: card)
 
         )
 
@@ -285,6 +257,106 @@ Widget buildWidePage(cards.Card card, List<Widget> additional) {
     );
 }
 
+
+class NestedTabBar extends StatefulWidget {
+  const NestedTabBar({super.key, required this.card});
+  final cards.Card card;
+
+  @override
+  State<NestedTabBar> createState() => NestedTabBarState();
+}
+
+class NestedTabBarState extends State<NestedTabBar> with TickerProviderStateMixin {
+  late final TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 4, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final List<Widget> cardInfo;
+
+    if (widget.card is cards.PokemonCard) {
+      cardInfo = getPokemonProperties(widget.card as cards.PokemonCard);
+    } else if (widget.card is cards.EnergyCard) {
+      cardInfo = getEnergyProperties(widget.card as cards.EnergyCard);
+    } else {
+      cardInfo = getTrainerProperties(widget.card as cards.TrainerCard);
+    }
+
+    List<Widget> variants = getVariants(widget.card);
+    List<Widget> pricing = getPricing(widget.card);
+
+
+
+    return Column(
+      children: [
+        Material(
+          child: TabBar(
+            controller: _tabController,
+            tabs: <Widget>[
+              const Tab(icon: Icon(Icons.looks_one)),
+              Tab(icon: Icon(Icons.looks_two)),
+              const Tab(icon: Icon(Icons.looks_3)),
+              const Tab(icon: Icon(Icons.looks_4))
+            ],
+          )
+        ),
+
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              ListView(
+                shrinkWrap: true,
+                children: [
+                  Material(child: ListTile(leading: Text("Name"), trailing: Text(widget.card.name))),
+                  Material(child: ListTile(leading: Text("Category"), trailing: Text(widget.card.category))),
+                  Material(child: ListTile(leading: Text("Illustrator"), trailing: Text(widget.card.illustrator ?? "Not Found"))),
+                  Material(child: ListTile(leading: Text("Rarity"), trailing: Text(widget.card.rarity ?? "Not Found"))),
+                  Material(child: ListTile(leading: Text("Set"), trailing: Row(mainAxisSize: MainAxisSize.min, children: [Image.network("${widget.card.set.symbol}.webp", 
+                      fit: BoxFit.scaleDown,
+                      errorBuilder: (context, error, stackTrace) => Text(""),
+                      ),
+                      Text(widget.card.set.name), 
+                      ]
+                      )
+                    )
+                  ),
+                ]
+              ),
+              ListView(
+                shrinkWrap: true,
+                children: cardInfo
+              ),
+              ListView(
+                shrinkWrap: true,
+                children: variants.isNotEmpty ? variants : [Material(child: ListTile(title: Text("Variants"))), Material(child: ListTile(title: Text("Not Found")))]
+              ),
+              ListView(
+                shrinkWrap: true,
+                children: pricing.isNotEmpty ? pricing : [Material(child: ListTile(title: Text("Pricing"))), Material(child: ListTile(title: Text("Not Found")))]
+              ),
+
+            ]
+          )
+        )
+
+      ]
+    );
+  }
+
+}
+
 List<Widget> getVariants(cards.Card card) {
   return [
     Material(child: ListTile(title: Text("Variants"))),
@@ -299,8 +371,8 @@ List<Widget> getVariants(cards.Card card) {
 
 List<Widget> getEnergyProperties(cards.EnergyCard card) {
   return [
-    Material(child: ListTile(leading: Text("Effect"), title: Align(alignment: Alignment.centerRight, child: Text(card.effect ?? "Not Found")),)),
-    Material(child: ListTile(leading: Text("Energy Type"), title: Align(alignment: Alignment.centerRight, child: Text(card.energyType)),)),
+    Material(child: ListTile(leading: Text("Energy Type"), trailing: Text(card.energyType))),
+    Material(child: ListTile(leading: Text("Effect"),  trailing: SizedBox(width: 120, child: Expanded(child: SingleChildScrollView(child: Text(card.effect ?? "Not Found", softWrap: true, overflow: TextOverflow.fade)))))),
   ];
 
 }
@@ -308,30 +380,30 @@ List<Widget> getEnergyProperties(cards.EnergyCard card) {
 
 List<Widget> getTrainerProperties(cards.TrainerCard card) {
   return [
-    Material(child: ListTile(leading: Text("Effect"), title: Align(alignment: Alignment.centerRight, child: Text(card.effect ?? "Not Found")),)),
-    Material(child: ListTile(leading: Text("Trainer Type"), title: Align(alignment: Alignment.centerRight, child: Text(card.trainerType)),)),
+    Material(child: ListTile(leading: Text("Trainer Type"), trailing: Text(card.trainerType))),
+    Material(child: ListTile(leading: Text("Effect"), trailing: SizedBox(width: 120, child: Expanded(child: SingleChildScrollView(child: Text(card.effect ?? "Not Found", softWrap: true, overflow: TextOverflow.fade,)))))),
   ];
 
 }
 
 List<Widget> getPokemonProperties(cards.PokemonCard card) {
   List<Widget> returnList = [];
-  returnList.add(Material(child: ListTile(leading: Text("Dex ID"), title: Align(alignment: Alignment.centerRight, child: Text(card.dexId.isNotEmpty ? card.dexId.join(", ") : "Not Found")))));
-  returnList.add(Material(child: ListTile(leading: Text("HP"), title: Align(alignment: Alignment.centerRight, child: Text(card.hp != null ? card.hp.toString() :"Not Found")))));
-  returnList.add(Material(child: ListTile(leading: Text("Types"), title: Align(alignment: Alignment.centerRight, child: Text(card.types.isNotEmpty ? card.types.join("/") : "Not Found")))));
+  returnList.add(Material(child: ListTile(leading: Text("Dex ID"), trailing: Text(card.dexId.isNotEmpty ? card.dexId.join(", ") : "Not Found"))));
+  returnList.add(Material(child: ListTile(leading: Text("HP"), trailing: Text(card.hp != null ? card.hp.toString() :"Not Found"))));
+  returnList.add(Material(child: ListTile(leading: Text("Types"), trailing: Text(card.types.isNotEmpty ? card.types.join("/") : "Not Found"))));
   if (card.evolveFrom != null) {
-    returnList.add(Material(child: ListTile(leading: Text("Evolve From"), title: Align(alignment: Alignment.centerRight, child: Text(card.evolveFrom!)))));
+    returnList.add(Material(child: ListTile(leading: Text("Evolve From"), trailing: Text(card.evolveFrom!))));
   }
-  returnList.add(Material(child: ListTile(leading: Text("Description"), title: Align(alignment: Alignment.centerRight, child: Text(card.description ?? "Not Found")))));
-  returnList.add(Material(child: ListTile(leading: Text("Level"), title: Align(alignment: Alignment.centerRight, child: Text(card.level ?? "Not Found")))));
-  returnList.add(Material(child: ListTile(leading: Text("Stage"), title: Align(alignment: Alignment.centerRight, child: Text(card.stage ?? "Not Found")))));
-  returnList.add(Material(child: ListTile(leading: Text("Suffix"), title: Align(alignment: Alignment.centerRight, child: Text(card.suffix ?? "Not Found")))));
+  returnList.add(Material(child: ListTile(leading: Text("Description"), trailing: SizedBox(width: 120, child: Expanded(child: SingleChildScrollView(child: Text(card.description ?? "Not Found", softWrap: true, overflow: TextOverflow.fade,)))))));
+  returnList.add(Material(child: ListTile(leading: Text("Level"), trailing: Text(card.level ?? "Not Found"))));
+  returnList.add(Material(child: ListTile(leading: Text("Stage"), trailing: Text(card.stage ?? "Not Found"))));
+  returnList.add(Material(child: ListTile(leading: Text("Suffix"), trailing: Text(card.suffix ?? "Not Found"))));
 
   if (card.item != null) {
     returnList.add(Divider());
     returnList.add(Material(child: ListTile(title: Text("Variants"))));
-    returnList.add(Material(child: ListTile(leading: Text("Name"), title: Align(alignment: Alignment.centerRight, child: Text(card.item!.name)))));
-    returnList.add(Material(child: ListTile(leading: Text("Effect"), title: Align(alignment: Alignment.centerRight, child: Text(card.item!.effect)))));
+    returnList.add(Material(child: ListTile(leading: Text("Name"), trailing: Text(card.item!.name))));
+    returnList.add(Material(child: ListTile(leading: Text("Effect"), trailing: SizedBox(width: 120, child: Expanded(child: SingleChildScrollView(child: Text(card.item!.effect, softWrap: true, overflow: TextOverflow.fade,)))))));
   }
 
 
@@ -346,29 +418,33 @@ List<Widget> getPricing(cards.Card card) {
       List<Widget> returnList = [Material(child: ListTile(title: Text("Pricing")))];
       var tcgplayer = card.pricing!.tcgplayer!;
       if (tcgplayer.normal != null) {
-        returnList.add(Material(child: ListTile(title: Text("Normal"), trailing: Text(tcgplayer.normal!.marketPrice != null ? tcgplayer.normal!.marketPrice.toString(): "Not Found"))));
+        returnList.add(Material(child: ListTile(leading: Text("Normal"), trailing: Text(tcgplayer.normal!.marketPrice != null ? tcgplayer.normal!.marketPrice.toString(): "Not Found"))));
       }
       if (tcgplayer.holofoil != null) {
-        returnList.add(Material(child: ListTile(title: Text("Holofoil"), trailing: Text(tcgplayer.holofoil!.marketPrice != null ? tcgplayer.holofoil!.marketPrice.toString(): "Not Found"))));
+        returnList.add(Material(child: ListTile(leading: Text("Holofoil"), trailing: Text(tcgplayer.holofoil!.marketPrice != null ? tcgplayer.holofoil!.marketPrice.toString(): "Not Found"))));
       }
 
       if (tcgplayer.reverseHolofoil != null) {
-        returnList.add(Material(child: ListTile(title: Text("Reverse Holofoil"), trailing: Text(tcgplayer.reverseHolofoil!.marketPrice != null ? tcgplayer.reverseHolofoil!.marketPrice.toString(): "Not Found"))));
+        returnList.add(Material(child: ListTile(leading: Text("Reverse Holofoil"), trailing: Text(tcgplayer.reverseHolofoil!.marketPrice != null ? tcgplayer.reverseHolofoil!.marketPrice.toString(): "Not Found"))));
       }
       if (tcgplayer.firstEdition != null) {
-        returnList.add(Material(child: ListTile(title: Text("First Edition"), trailing: Text(tcgplayer.firstEdition!.marketPrice != null ? tcgplayer.firstEdition!.marketPrice.toString(): "Not Found"))));
+        returnList.add(Material(child: ListTile(leading: Text("First Edition"), trailing: Text(tcgplayer.firstEdition!.marketPrice != null ? tcgplayer.firstEdition!.marketPrice.toString(): "Not Found"))));
       }
       if (tcgplayer.firstEditionHolofoil != null) {
-        returnList.add(Material(child: ListTile(title: Text("First Edition Holofoil"), trailing: Text(tcgplayer.firstEditionHolofoil!.marketPrice != null ? tcgplayer.firstEditionHolofoil!.marketPrice.toString(): "Not Found"))));
+        returnList.add(Material(child: ListTile(leading: Text("First Edition Holofoil"), trailing: Text(tcgplayer.firstEditionHolofoil!.marketPrice != null ? tcgplayer.firstEditionHolofoil!.marketPrice.toString(): "Not Found"))));
       }
       if (tcgplayer.unlimited != null) {
-        returnList.add(Material(child: ListTile(title: Text("Unlimited"), trailing: Text(tcgplayer.unlimited!.marketPrice != null ? tcgplayer.unlimited!.marketPrice.toString(): "Not Found"))));
+        returnList.add(Material(child: ListTile(leading: Text("Unlimited"), trailing: Text(tcgplayer.unlimited!.marketPrice != null ? tcgplayer.unlimited!.marketPrice.toString(): "Not Found"))));
       }
       if (tcgplayer.unlimitedHolofoil != null) {
-        returnList.add(Material(child: ListTile(title: Text("Unlimited Holofoil"), trailing: Text(tcgplayer.unlimitedHolofoil!.marketPrice != null ? tcgplayer.unlimitedHolofoil!.marketPrice.toString(): "Not Found"))));
+        returnList.add(Material(child: ListTile(leading: Text("Unlimited Holofoil"), trailing: Text(tcgplayer.unlimitedHolofoil!.marketPrice != null ? tcgplayer.unlimitedHolofoil!.marketPrice.toString(): "Not Found"))));
       }
 
-      return returnList;
+      if (returnList.length > 1) {
+        return returnList;
+      } else {
+        return [];
+      }
     }
   }
   
