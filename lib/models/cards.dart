@@ -587,15 +587,20 @@ class EnergyCard extends Card {
 
 
   final String? effect;
-  final String energyType;
+  final String? energyType;
 
   static EnergyCard fromJson(Map<String, Object?> json) {
     final cardDetails = Card.extractCardJsonValues(json);
 
     String? effect;
+    String? energyType;
     
     if (json.containsKey("effect")) {
       effect = json["effect"] as String?;
+    }
+
+    if (json.containsKey("energyType")) {
+      energyType = json["energyType"] as String?;
     }
 
     return EnergyCard(
@@ -613,7 +618,7 @@ class EnergyCard extends Card {
       updated: cardDetails["updated"] as String,
 
       effect: effect,
-      energyType: json["energyType"] as String
+      energyType: energyType
     );
 
   }
@@ -642,16 +647,21 @@ class TrainerCard extends Card {
 
 
   final String? effect;
-  final String trainerType;
+  final String? trainerType;
 
 
   static TrainerCard fromJson(Map<String, Object?> json) {
     final cardDetails = Card.extractCardJsonValues(json);
 
     String? effect;
+    String? trainerType;
     
     if (json.containsKey("effect")) {
       effect = json["effect"] as String?;
+    }
+
+    if (json.containsKey("trainerType")) {
+      trainerType = json["trainerType"] as String?;
     }
 
     return TrainerCard(
@@ -669,7 +679,7 @@ class TrainerCard extends Card {
       updated: cardDetails["updated"] as String,
 
       effect: effect,
-      trainerType: json["trainerType"] as String
+      trainerType: trainerType
     );
 
   }

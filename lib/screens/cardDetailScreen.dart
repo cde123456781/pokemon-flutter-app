@@ -393,8 +393,8 @@ List<Widget> getVariants(cards.Card card) {
 
 List<Widget> getEnergyProperties(cards.EnergyCard card) {
   return [
-    Material(child: ListTile(leading: Text("Energy Type"), trailing: Text(card.energyType))),
-    Material(child: ListTile(leading: Text("Effect"),  trailing: SizedBox(width: 120, child: Expanded(child: SingleChildScrollView(child: Text(card.effect ?? "Not Found", softWrap: true, overflow: TextOverflow.fade)))))),
+    Material(child: ListTile(leading: Text("Energy Type"), trailing: Text(card.energyType ?? "Not Found"))),
+    Material(child: ListTile(leading: Text("Effect"),  trailing: SizedBox(width: 120, child: Expanded(child: SingleChildScrollView(child: Text(card.effect ?? "Not Found", softWrap: true, overflow: TextOverflow.fade, textAlign: TextAlign.right)))))),
   ];
 
 }
@@ -402,8 +402,8 @@ List<Widget> getEnergyProperties(cards.EnergyCard card) {
 
 List<Widget> getTrainerProperties(cards.TrainerCard card) {
   return [
-    Material(child: ListTile(leading: Text("Trainer Type"), trailing: Text(card.trainerType))),
-    Material(child: ListTile(leading: Text("Effect"), trailing: SizedBox(width: 120, child: Expanded(child: SingleChildScrollView(child: Text(card.effect ?? "Not Found", softWrap: true, overflow: TextOverflow.fade,)))))),
+    Material(child: ListTile(leading: Text("Trainer Type"), trailing: Text(card.trainerType ?? "Not Found"))),
+    Material(child: ListTile(leading: Text("Effect"), trailing: SizedBox(width: 120, child: Expanded(child: SingleChildScrollView(child: Text(card.effect ?? "Not Found", softWrap: true, overflow: TextOverflow.fade, textAlign: TextAlign.right,)))))),
   ];
 
 }

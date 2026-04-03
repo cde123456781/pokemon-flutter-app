@@ -39,7 +39,7 @@ class MainApp extends StatelessWidget {
         GoRoute(
           name: "cards",
           path: '/cards',
-          builder: (context, state) => CardBriefView(),
+          builder: (context, state) => CardBriefView(initialSet: state.uri.queryParameters["initialSet"]),
         ),
         GoRoute(
           name: "sets",

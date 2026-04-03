@@ -16,7 +16,7 @@ class Sidebar extends StatelessWidget {
           children: [
             const DrawerHeader(
               decoration: BoxDecoration(color: Colors.blue),
-              child: Text('Drawer Header'),
+              child: Text(''),
             ),
             ListTile(
               title: const Text('Cards'),

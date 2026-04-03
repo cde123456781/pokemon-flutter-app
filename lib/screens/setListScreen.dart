@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart';
 
 import "dart:convert";
@@ -254,27 +255,34 @@ class SetWidget extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: const Color.fromARGB(255, 211, 224, 230)),
-        borderRadius: BorderRadius.circular(20)
-      ),
-      padding: EdgeInsets.only(top: 10),
-      
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-            Expanded(
-              child: Image.network(
-              "${set.logo}.webp", 
-              fit: BoxFit.scaleDown,
-              //loadingBuilder: (context, child, loadingProgress) => CircularProgressIndicator(),
-              errorBuilder: (context, error, stackTrace) => Icon(Icons.question_mark),
-            )),
-            Text(set.name)
-        ],
-      ),
+    return Material(
+      child: InkWell(
+        onTap: () => {
+          context.goNamed("cards", queryParameters: {"initialSet": set.id})
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: const Color.fromARGB(255, 211, 224, 230)),
+            borderRadius: BorderRadius.circular(20)
+          ),
+          padding: EdgeInsets.only(top: 10),
+          
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+                Expanded(
+                  child: Image.network(
+                  "${set.logo}.webp", 
+                  fit: BoxFit.scaleDown,
+                  //loadingBuilder: (context, child, loadingProgress) => CircularProgressIndicator(),
+                  errorBuilder: (context, error, stackTrace) => Icon(Icons.question_mark),
+                )),
+                Text(set.name)
+            ],
+          ),
+        )
+      )
     );
   }
 

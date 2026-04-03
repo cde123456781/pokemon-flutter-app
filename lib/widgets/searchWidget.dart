@@ -3,10 +3,11 @@ import 'package:pokemon_app/models/sets.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 
 class SearchWidget extends StatefulWidget {
-  const SearchWidget({super.key, required this.onPressed, required this.sets});
+  const SearchWidget({super.key, required this.onPressed, required this.sets, this.initialSet});
 
   final Function onPressed;
   final List<SetBrief> sets;
+  final String? initialSet;
 
   @override
   SearchWidgetState createState() {
@@ -21,6 +22,38 @@ class SearchWidgetState extends State<SearchWidget> {
   String? setId;
   final _formKey = GlobalKey<FormState>();
 
+
+  late List<DropdownMenuEntry<String?>> entries;
+
+  @override 
+  void initState() {
+    super.initState();
+    setId = widget.initialSet;
+    entries = [
+      DropdownMenuEntry(value: null, label: "All Sets"),
+      ...widget.sets.map((set) => DropdownMenuEntry(value: set.id, label: set.name))
+    ];
+  }
+
+  @override
+  void didUpdateWidget(covariant SearchWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.sets != widget.sets) {
+      entries = [
+      DropdownMenuEntry(value: null, label: "All Sets"),
+      ...widget.sets.map((set) => DropdownMenuEntry(value: set.id, label: set.name))
+      ];
+    }
+
+    if (oldWidget.initialSet != widget.initialSet) {
+      setId = widget.initialSet; 
+    }
+
+  }
+
+
+  
   @override
   void dispose() {
     super.dispose();
@@ -48,20 +81,16 @@ class SearchWidgetState extends State<SearchWidget> {
               )
             ),
             DropdownMenu(
-              initialSelection: null,
+              key: ValueKey(setId),
+              initialSelection: widget.initialSet,
               requestFocusOnTap: false,
               menuHeight: 200,
-              onSelected: (value) => {
-                setId = value
+              onSelected: (value) {
+                setState(() { 
+                  setId = value;
+                });
               },
-              dropdownMenuEntries: [
-                DropdownMenuEntry(value: null, label: "All Sets"),
-                for (var set in widget.sets)
-                  DropdownMenuEntry(
-                    label: set.name,
-                    value: set.id
-                  )
-              ]
+              dropdownMenuEntries: entries
             ),
             ElevatedButton(
                 onPressed: () => widget.onPressed(controller.text, setId), 

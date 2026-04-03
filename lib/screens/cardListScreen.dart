@@ -133,8 +133,16 @@ class SetBriefViewModel extends ChangeNotifier {
   List<SetBrief> _sets = [];
   List<SetBrief> get sets => _sets;
 
+  String? initialSet;
+
   SetBriefViewModel() {
     getSets();
+  }
+
+  void setInitialSet (String? set) {
+    notifyListeners();
+    initialSet = set;
+    notifyListeners();
   }
 
 
@@ -157,20 +165,63 @@ class SetBriefViewModel extends ChangeNotifier {
 }
 
 
-class CardBriefView extends StatelessWidget {
-  CardBriefView({super.key});
+class CardBriefView extends StatefulWidget {
+  CardBriefView({super.key, this.initialSet});
+
+  final String? initialSet; 
+
+  @override
+  CardBriefViewState createState() {
+    return CardBriefViewState();
+  }
+}
+
+
+
+
+class CardBriefViewState extends State<CardBriefView> {
 
   final CardBriefViewModel cardBriefViewModel = CardBriefViewModel();
   final SetBriefViewModel setBriefViewModel = SetBriefViewModel();
+  String? initialSet;
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialSet != null) {
+      cardBriefViewModel.getCardBriefs("", widget.initialSet);
+      setBriefViewModel.setInitialSet(widget.initialSet);
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant CardBriefView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.initialSet != widget.initialSet) {
+      cardBriefViewModel.getCardBriefs("", widget.initialSet);
+      setBriefViewModel.setInitialSet(widget.initialSet);
+    }
+
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
+
+
     return Column(children: [
           ListenableBuilder(
             listenable: setBriefViewModel,
             builder: (context, child) {
               return Center(
-                child: SearchWidget(onPressed: cardBriefViewModel.getCardBriefs, sets: setBriefViewModel.sets)
+                child: SearchWidget(onPressed: cardBriefViewModel.getCardBriefs, sets: setBriefViewModel.sets, initialSet: setBriefViewModel.initialSet,)
               );
             }
           ),
