@@ -104,21 +104,9 @@ class CardView extends StatelessWidget {
                 LayoutBuilder(
                   builder: (context, constraints) {
                     if (constraints.maxWidth < 600) {
-                      if (card is cards.PokemonCard) {
-                        return PokemonPhonePage(card: card,);
-                      } else {
-                        return Text("");
-
-                      }
-
+                      return PhonePage(card: card,);
                     } else {
-                      if (card is cards.PokemonCard) {
-                        return PokemonWidePage(card: card);
-
-                      } else {
-                        return EnergyWidePage(card: card);
-                      }
-
+                      return WidePage(card: card);
                     }
 
                   }
@@ -139,8 +127,8 @@ class CardView extends StatelessWidget {
   }
 }
 
-class PokemonPhonePage extends StatelessWidget {
-  const PokemonPhonePage({
+class PhonePage extends StatelessWidget {
+  const PhonePage({
     super.key,
     required this.card,
     //required this.onPressed
@@ -151,15 +139,67 @@ class PokemonPhonePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> cardInfo;
+
+    if (card is cards.PokemonCard) {
+      cardInfo = getPokemonProperties(card as cards.PokemonCard);
+    } else if (card is cards.EnergyCard) {
+      cardInfo = getEnergyProperties(card as cards.EnergyCard);
+    } else {
+      cardInfo = getTrainerProperties(card as cards.TrainerCard);
+    }
+
+    List<Widget> variants = getVariants(card);
+    List<Widget> pricing = getPricing(card);
+
+
+
+
+
     return Column(
 
       children: [
-        Flexible(
-          child: Image.network(
-            "${card.image}/high.webp", 
-            fit: BoxFit.scaleDown,
-              //loadingBuilder: (context, child, loadingProgress) => CircularProgressIndicator(),
-            errorBuilder: (context, error, stackTrace) => Icon(Icons.question_mark),
+        Expanded(
+          child: ListView(
+            children: [
+              Image.network(
+                "${card.image}/low.webp", 
+                fit: BoxFit.scaleDown,
+                  //loadingBuilder: (context, child, loadingProgress) => CircularProgressIndicator(),
+                errorBuilder: (context, error, stackTrace) => Icon(Icons.question_mark),
+              ),
+
+
+
+
+
+              Material(child: ListTile(leading: Text("Name"), trailing: Text(card.name))),
+              Material(child: ListTile(leading: Text("Category"), trailing: Text(card.category))),
+              Material(child: ListTile(leading: Text("Illustrator"), trailing: Text(card.illustrator ?? "Not Found"))),
+              Material(child: ListTile(leading: Text("Rarity"), trailing: Text(card.rarity ?? "Not Found"))),
+              Material(child: ListTile(leading: Text("Set"), trailing: Row(mainAxisSize: MainAxisSize.min, children: [Image.network("${card.set.symbol}.webp", 
+                fit: BoxFit.scaleDown,
+                errorBuilder: (context, error, stackTrace) => Text(""),
+                ),
+                Text(card.set.name), 
+                ]
+                )
+              )),
+                
+              ListView(
+                shrinkWrap: true,
+                children: cardInfo
+              ),
+              ListView(
+                shrinkWrap: true,
+                children: variants.isNotEmpty ? variants : [Material(child: ListTile(title: Text("Variants"))), Material(child: ListTile(title: Text("Not Found")))]
+              ),
+              ListView(
+                shrinkWrap: true,
+                children: pricing.isNotEmpty ? pricing : [Material(child: ListTile(title: Text("Pricing"))), Material(child: ListTile(title: Text("Not Found")))]
+              )
+
+            ]
           )
         ),
 
@@ -179,38 +219,18 @@ class PokemonPhonePage extends StatelessWidget {
 
 
 
-class PokemonWidePage extends StatelessWidget {
-  const PokemonWidePage({
+class WidePage extends StatelessWidget {
+  const WidePage({
     super.key,
     required this.card,
-    //required this.onPressed
   });
 
   final cards.Card card;
-  //final Function onPressed;
+
 
   @override
   Widget build(BuildContext context) {
-    return buildWidePage(card, []);
-    
-    
-  }
-
-}
-
-class EnergyWidePage extends StatelessWidget {
-  const EnergyWidePage({
-    super.key,
-    required this.card,
-    //required this.onPressed
-  });
-
-  final cards.Card card;
-  //final Function onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return buildWidePage(card, []);
+    return buildWidePage(card);
     
     
   }
@@ -220,7 +240,9 @@ class EnergyWidePage extends StatelessWidget {
 
 
 
-Widget buildWidePage(cards.Card card, List<Widget> additional) {
+
+
+Widget buildWidePage(cards.Card card) {
   return SizedBox.expand(
       child: FractionallySizedBox(
       heightFactor: 0.8,
@@ -394,7 +416,7 @@ List<Widget> getPokemonProperties(cards.PokemonCard card) {
   if (card.evolveFrom != null) {
     returnList.add(Material(child: ListTile(leading: Text("Evolve From"), trailing: Text(card.evolveFrom!))));
   }
-  returnList.add(Material(child: ListTile(leading: Text("Description"), trailing: SizedBox(width: 120, child: Expanded(child: SingleChildScrollView(child: Text(card.description ?? "Not Found", softWrap: true, overflow: TextOverflow.fade,)))))));
+  returnList.add(Material(child: ListTile(leading: Text("Description"), trailing: SizedBox(width: 120, child: Expanded(child: SingleChildScrollView(child: Text(card.description ?? "Not Found", softWrap: true, overflow: TextOverflow.fade, textAlign: TextAlign.right,)))))));
   returnList.add(Material(child: ListTile(leading: Text("Level"), trailing: Text(card.level ?? "Not Found"))));
   returnList.add(Material(child: ListTile(leading: Text("Stage"), trailing: Text(card.stage ?? "Not Found"))));
   returnList.add(Material(child: ListTile(leading: Text("Suffix"), trailing: Text(card.suffix ?? "Not Found"))));
