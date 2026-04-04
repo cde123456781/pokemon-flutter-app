@@ -3,11 +3,10 @@ import 'package:pokemon_app/models/sets.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 
 class SearchWidget extends StatefulWidget {
-  const SearchWidget({super.key, required this.onPressed, required this.sets, this.initialSet});
+  const SearchWidget({super.key, required this.onPressed, required this.sets});
 
   final Function onPressed;
   final List<SetBrief> sets;
-  final String? initialSet;
 
   @override
   SearchWidgetState createState() {
@@ -28,7 +27,6 @@ class SearchWidgetState extends State<SearchWidget> {
   @override 
   void initState() {
     super.initState();
-    setId = widget.initialSet;
     entries = [
       DropdownMenuEntry(value: null, label: "All Sets"),
       ...widget.sets.map((set) => DropdownMenuEntry(value: set.id, label: set.name))
@@ -46,9 +44,6 @@ class SearchWidgetState extends State<SearchWidget> {
       ];
     }
 
-    if (oldWidget.initialSet != widget.initialSet) {
-      setId = widget.initialSet; 
-    }
 
   }
 
@@ -81,8 +76,7 @@ class SearchWidgetState extends State<SearchWidget> {
               )
             ),
             DropdownMenu(
-              key: ValueKey(setId),
-              initialSelection: widget.initialSet,
+              initialSelection: null,
               requestFocusOnTap: false,
               menuHeight: 200,
               onSelected: (value) {

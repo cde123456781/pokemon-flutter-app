@@ -139,11 +139,6 @@ class SetBriefViewModel extends ChangeNotifier {
     getSets();
   }
 
-  void setInitialSet (String? set) {
-    notifyListeners();
-    initialSet = set;
-    notifyListeners();
-  }
 
 
   Future<void> getSets() async {
@@ -195,7 +190,7 @@ class CardBriefViewState extends State<CardBriefView> {
     super.initState();
     if (widget.initialSet != null) {
       cardBriefViewModel.getCardBriefs("", widget.initialSet);
-      setBriefViewModel.setInitialSet(widget.initialSet);
+
     }
   }
 
@@ -205,7 +200,7 @@ class CardBriefViewState extends State<CardBriefView> {
 
     if (oldWidget.initialSet != widget.initialSet) {
       cardBriefViewModel.getCardBriefs("", widget.initialSet);
-      setBriefViewModel.setInitialSet(widget.initialSet);
+
     }
 
   }
@@ -221,7 +216,7 @@ class CardBriefViewState extends State<CardBriefView> {
             listenable: setBriefViewModel,
             builder: (context, child) {
               return Center(
-                child: SearchWidget(onPressed: cardBriefViewModel.getCardBriefs, sets: setBriefViewModel.sets, initialSet: setBriefViewModel.initialSet,)
+                child: SearchWidget(onPressed: cardBriefViewModel.getCardBriefs, sets: setBriefViewModel.sets)
               );
             }
           ),
@@ -235,9 +230,10 @@ class CardBriefViewState extends State<CardBriefView> {
               )) {
                 (true, _, _) => LoadingIndicator(),
                 (false, _, String message) => Center(child: Text(message)),
-                (false, List<cards.CardBrief> cardBriefs, null) => CardBriefPage(
-                  cardBriefs: cardBriefs,
-                  //onPressed: viewModel.getCardBriefs
+                (false, List<cards.CardBrief> cardBriefs, null) => Expanded(child: CardBriefPage(
+                    cardBriefs: cardBriefs,
+                    //onPressed: viewModel.getCardBriefs
+                  )
                 )
               };
             }
@@ -262,16 +258,15 @@ class CardBriefPage extends StatelessWidget {
 
       child: 
         switch (cardBriefs.isNotEmpty) {
-          (true) => Expanded(
-            child: ResponsiveGridView.builder(
+          (true) =>  Center(child: ConstrainedBox(constraints: BoxConstraints(maxWidth: 1000), child: ResponsiveGridView.builder(
   
               scrollDirection: Axis.vertical,
               shrinkWrap: true,
               physics: ScrollPhysics(),
               gridDelegate: ResponsiveGridDelegate(
                 crossAxisExtent: 150,
-                crossAxisSpacing: 30,
-                mainAxisSpacing: 10
+                crossAxisSpacing: 0,
+                mainAxisSpacing: 0
 
                 
               ),
@@ -279,9 +274,7 @@ class CardBriefPage extends StatelessWidget {
                 return CardBriefWidget(cardBrief: cardBriefs[index]);
               },
               itemCount: cardBriefs.length,
-            ), 
-    
-        ),
+            ))), 
         (false) => Text("No results found")
         }
       
